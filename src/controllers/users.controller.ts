@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import bcrypt from 'bcryptjs';
 
 import { connect } from '../database';
 
@@ -13,7 +14,10 @@ export async function getAllUsers(req: Request, resp: Response): Promise<Respons
 
 export async function addUser(req: Request, resp: Response): Promise<Response> {
     const conn = await connect();
-    const newUser: User = req.body;
+    let newUser: User = req.body;
+
+    newUser.password = await bcrypt.hash(newUser.password.toString(),5);
+    
     const user = await conn.query('INSERT INTO users SET ?', [newUser]);
 
     return resp.json({
@@ -53,4 +57,14 @@ export async function deleUser(req: Request, resp: Response): Promise<Response> 
     return resp.json({
         message: 'user successfully removed'
     });
+}
+
+export async function findUserByEmail(email:string) {
+    const conn = await connect();
+
+    const user = await conn.query('SELECT * FROM users WHERE email = ?', [email]);
+
+    let temp = user[0] as User[];
+
+    return temp;
 }
