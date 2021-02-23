@@ -54,3 +54,15 @@ export async function deleBook(req: Request, resp: Response): Promise<Response> 
         message: 'Book successfully removed'
     });
 }
+
+export async function uploadImage(req: Request, resp: Response): Promise<Response> {
+    const conn = await connect();
+    const id = req.params.id;
+    console.log(req.file);
+    let url = `localhost:3000\\${req.file.path}`;
+    await conn.query('UPDATE books SET image=? WHERE id = ?', [url, id]);
+
+    return resp.json({
+        message: 'image uploated successfully'
+    });
+}

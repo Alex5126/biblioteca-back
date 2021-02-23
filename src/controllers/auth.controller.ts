@@ -21,8 +21,9 @@ export async function login(req: Request, resp: Response): Promise<Response> {
 
             return resp.json({
                 user: {
-                    userId: user[0].id,
-                    userName: user[0].name
+                    id: user[0].id,
+                    name: user[0].name,
+                    type: user[0].type
                 },
                 token: token
             });

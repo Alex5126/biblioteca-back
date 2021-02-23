@@ -38,8 +38,10 @@ export async function getUserById(req: Request, resp: Response): Promise<Respons
 
 export async function updateUser(req: Request, resp: Response): Promise<Response> {
     const conn = await connect();
-    const user: User = req.body;
+    let user: User = req.body;
     const id = req.params.id;
+
+    user.password = await bcrypt.hash(user.password.toString(),5);
 
     await conn.query('UPDATE users SET ? WHERE id = ?', [user, id]);
 
@@ -51,7 +53,8 @@ export async function updateUser(req: Request, resp: Response): Promise<Response
 export async function deleUser(req: Request, resp: Response): Promise<Response> {
     const conn = await connect();
     const id = req.params.id;
-
+    await conn.query('DELETE FROM loan_history WHERE id_user = ?', [id]);
+    await conn.query('DELETE FROM loan_applications WHERE id_user = ?', [id]);
     await conn.query('DELETE FROM users WHERE id = ?', [id]);
 
     return resp.json({

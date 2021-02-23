@@ -7,8 +7,19 @@ import { LoanHistory } from '../interfaces/loanHistory';
 
 export async function getAllLoanApp(req: Request, resp: Response): Promise<Response> {
     const conn = await connect();
-    const loanApp = await conn.query('SELECT * FROM loan_applications');
-
+    const loanApp = await conn.query(`
+    SELECT 
+	    loan_applications.id,
+        loan_applications.id_user,
+        loan_applications.id_book, 
+	    loan_applications.status,
+	    loan_applications.date,
+	    loan_applications.update_date,
+	    users.name AS user,
+	    books.title AS book
+    FROM loan_applications 
+	    JOIN users ON loan_applications.id_user = users.id 
+	    JOIN books ON loan_applications.id_book = books.id`);
     return resp.json(loanApp[0]);
 }
 
@@ -37,14 +48,15 @@ export async function updateLoanApp(req: Request, resp: Response): Promise<Respo
     const conn = await connect();
     const loanApp: LoanApplication = req.body;
     const id = req.params.id;
-
+    console.log(req.body);
+    
     await conn.query('UPDATE loan_applications SET ? WHERE id = ?', [loanApp, id]);
 
-    if(loanApp.status === 'ACEPTADA'){
-        let history:LoanHistory = {
-            id_user:loanApp.id_user,
-            id_book:loanApp.id_book,
-            status:'SIN ENTREGAR'
+    if (loanApp.status === 'ACEPTADA') {
+        let history: LoanHistory = {
+            id_user: loanApp.id_user,
+            id_book: loanApp.id_book,
+            status: 'SIN ENTREGAR'
         };
 
         await conn.query('INSERT INTO loan_history SET ?', [history]);

@@ -6,7 +6,18 @@ import { LoanHistory } from '../interfaces/loanHistory';
 
 export async function getAllLoanHist(req: Request, resp: Response): Promise<Response> {
     const conn = await connect();
-    const loanHist = await conn.query('SELECT * FROM loan_history');
+    const loanHist = await conn.query(`SELECT 
+	loan_history.id,
+	loan_history.id_user,
+	loan_history.id_book,
+	loan_history.status,
+	loan_history.loan_date,
+	loan_history.update_date,
+	users.name AS user,
+	books.title AS book
+FROM loan_history 
+	JOIN users ON loan_history.id_user = users.id
+	JOIN books ON loan_history.id_book = books.id;`);
 
     return resp.json(loanHist[0]);
 }
@@ -27,7 +38,19 @@ export async function findLoanByUserID(req: Request, resp: Response): Promise<Re
     const conn = await connect();
     const id = req.params.id;
 
-    const loanApp = await conn.query('SELECT * FROM loan_applications WHERE id = ?', [id]);
+    const loanApp = await conn.query(`SELECT 
+	loan_history.id,
+	loan_history.id_user,
+	loan_history.id_book,
+	loan_history.status,
+	loan_history.loan_date,
+	loan_history.update_date,
+	users.name AS user,
+	books.title AS book
+FROM loan_history 
+	JOIN users ON loan_history.id_user = users.id
+	JOIN books ON loan_history.id_book = books.id
+AND loan_history.id_user = ?;`,[id]);
 
     let temp = loanApp[0] as LoanHistory[];
 
